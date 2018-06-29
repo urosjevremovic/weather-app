@@ -1,7 +1,5 @@
 import requests
-import json
 
-from django.http import HttpResponse
 from django.shortcuts import render
 
 from .models import City
@@ -24,19 +22,17 @@ def index(request):
     for city in cities:
 
         response = requests.get(url.format(city)).json()
-        print(response)
 
-        city_weather = {
-            'city': city.name,
-            'temperature': response['main']['temp'],
-            'description': response['weather'][0]['description'],
-            'icon': response['weather'][0]['icon'],
-        }
-        # print(city_weather)
-        # city_weather = json.dumps(city_weather)
-        # print(city_weather)
-        # weather_data.append(city_weather)
+        try:
+            city_weather = {
+                'city': city.name,
+                'temperature': response['main']['temp'],
+                'description': response['weather'][0]['description'],
+                'icon': response['weather'][0]['icon'],
+            }
+            error = ''
+        except KeyError:
+            city_weather = ''
+            error = 'Please enter a valid city name'
 
-    # print(weather_data)
-    return render(request, 'weather/weather.html', context={'city_weather': city_weather, 'form': form})
-    # return HttpResponse(city_weather, content_type='text/json')
+    return render(request, 'weather/weather.html', context={'city_weather': city_weather, 'error': error, 'form': form})
